@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DEVICES_FILE = "devices.sample_1.json"
+DEVICES_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "devices.sample_1.json")
 devices_data = []
 
 def load_devices():

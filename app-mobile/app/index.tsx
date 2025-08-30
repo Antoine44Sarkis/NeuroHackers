@@ -18,7 +18,8 @@ import { Picker } from "@react-native-picker/picker";
 import { getGroupColor } from "@/utils/deviceUtils";
 import { Ionicons } from "@expo/vector-icons";
 
-const API_BASE = "http://192.168.0.103:8000";
+// @ts-ignore
+import { API_BASE } from "@env";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
