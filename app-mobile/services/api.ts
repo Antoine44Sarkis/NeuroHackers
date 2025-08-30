@@ -1,14 +1,16 @@
-import { Device, Summary } from '../constants/Types';
+import { Device, Summary } from "../constants/Types";
+// @ts-ignore
+import { API_BASE } from "@env";
 
-const API_BASE_URL = 'http://192.168.0.103:8000';
+const API_BASE_URL = API_BASE;
 
 export const fetchDevices = async (): Promise<Device[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/devices`);
-    if (!response.ok) throw new Error('Failed to fetch devices');
+    if (!response.ok) throw new Error("Failed to fetch devices");
     return await response.json();
   } catch (error) {
-    console.error('Fetch error:', error);
+    console.error("Fetch error:", error);
     throw error;
   }
 };
@@ -16,10 +18,10 @@ export const fetchDevices = async (): Promise<Device[]> => {
 export const fetchSummary = async (): Promise<Summary> => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/summary`);
-    if (!response.ok) throw new Error('Failed to fetch summary');
+    if (!response.ok) throw new Error("Failed to fetch summary");
     return await response.json();
   } catch (error) {
-    console.error('Summary fetch error:', error);
+    console.error("Summary fetch error:", error);
     throw error;
   }
 };
@@ -30,16 +32,19 @@ export const performDeviceAction = async (
   category: string | null = null
 ): Promise<Device> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/devices/${deviceId}/actions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, category }),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/devices/${deviceId}/actions`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, category }),
+      }
+    );
 
     if (!response.ok) throw new Error(`Failed to ${action} device`);
     return await response.json();
   } catch (error) {
-    console.error('Action error:', error);
+    console.error("Action error:", error);
     throw error;
   }
 };
