@@ -657,6 +657,185 @@ const DeviceVizMobile = () => {
                   ))}
                 </View>
               </View>
+
+              {/* Network Details */}
+              <View style={styles.infoSection}>
+                <Text style={styles.sectionTitle}>Network Details</Text>
+                <View style={styles.infoGrid}>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="hardware-chip" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>{optimisticDevice.mac}</Text>
+                  </View>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="time" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                      {optimisticDevice.is_mac_universal
+                        ? "Randomized MAC"
+                        : "Fixed MAC"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* OS Details */}
+              <View style={styles.infoSection}>
+                <Text style={styles.sectionTitle}>Operating System</Text>
+                <View style={styles.infoGrid}>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="stats-chart" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                      {optimisticDevice.os_accuracy}% Accuracy
+                    </Text>
+                  </View>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="business" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                      {optimisticDevice.os_vendor}
+                    </Text>
+                  </View>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="git-branch" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                      {optimisticDevice.os_family}
+                    </Text>
+                  </View>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="calendar" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                      Last updated:{" "}
+                      {new Date(
+                        optimisticDevice.os_last_updated
+                      ).toLocaleDateString()}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Activity Timeline */}
+              <View style={styles.infoSection}>
+                <Text style={styles.sectionTitle}>Activity Timeline</Text>
+                <View style={styles.infoGrid}>
+                  <View style={styles.infoItem}>
+                    <Ionicons
+                      name="arrow-down-circle"
+                      size={16}
+                      color="#6366F1"
+                    />
+                    <Text style={styles.infoText}>
+                      First seen:{" "}
+                      {new Date(optimisticDevice.first_seen).toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={styles.infoItem}>
+                    <Ionicons
+                      name="arrow-up-circle"
+                      size={16}
+                      color="#6366F1"
+                    />
+                    <Text style={styles.infoText}>
+                      Last seen:{" "}
+                      {new Date(optimisticDevice.last_seen).toLocaleString()}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* AI Classification Details */}
+              <View style={styles.infoSection}>
+                <Text style={styles.sectionTitle}>
+                  AI Classification Details
+                </Text>
+                <Text style={styles.infoTextSmall}>
+                  {optimisticDevice.ai_classification.reasoning}
+                </Text>
+                <View style={styles.chipContainer}>
+                  {optimisticDevice.ai_classification.indicators.map(
+                    (
+                      indicator:
+                        | string
+                        | number
+                        | bigint
+                        | boolean
+                        | React.ReactElement<
+                            unknown,
+                            string | React.JSXElementConstructor<any>
+                          >
+                        | Iterable<React.ReactNode>
+                        | React.ReactPortal
+                        | Promise<
+                            | string
+                            | number
+                            | bigint
+                            | boolean
+                            | React.ReactPortal
+                            | React.ReactElement<
+                                unknown,
+                                string | React.JSXElementConstructor<any>
+                              >
+                            | Iterable<React.ReactNode>
+                            | null
+                            | undefined
+                          >
+                        | null
+                        | undefined,
+                      index: React.Key | null | undefined
+                    ) => (
+                      <View key={index} style={styles.chip}>
+                        <Text style={styles.chipText}>{indicator}</Text>
+                      </View>
+                    )
+                  )}
+                </View>
+                <Text style={styles.infoTextSmall}>
+                  Last classified:{" "}
+                  {new Date(
+                    optimisticDevice.ai_classification.last_classified
+                  ).toLocaleString()}
+                </Text>
+              </View>
+
+              {/* User Agent */}
+              {optimisticDevice.user_agent.length > 0 && (
+                <View style={styles.infoSection}>
+                  <Text style={styles.sectionTitle}>User Agent</Text>
+                  {optimisticDevice.user_agent.map(
+                    (
+                      ua:
+                        | string
+                        | number
+                        | bigint
+                        | boolean
+                        | React.ReactElement<
+                            unknown,
+                            string | React.JSXElementConstructor<any>
+                          >
+                        | Iterable<React.ReactNode>
+                        | React.ReactPortal
+                        | Promise<
+                            | string
+                            | number
+                            | bigint
+                            | boolean
+                            | React.ReactPortal
+                            | React.ReactElement<
+                                unknown,
+                                string | React.JSXElementConstructor<any>
+                              >
+                            | Iterable<React.ReactNode>
+                            | null
+                            | undefined
+                          >
+                        | null
+                        | undefined,
+                      index: React.Key | null | undefined
+                    ) => (
+                      <Text key={index} style={styles.infoTextSmall}>
+                        {ua}
+                      </Text>
+                    )
+                  )}
+                </View>
+              )}
             </ScrollView>
           </View>
         </View>
@@ -1262,6 +1441,38 @@ const styles = StyleSheet.create({
   blocklistText: {
     fontSize: 14,
     fontWeight: "500",
+  },
+  chipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginVertical: 8,
+  },
+  chip: {
+    backgroundColor: "#E5E7EB",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  chipText: {
+    fontSize: 12,
+    color: "#4B5563",
+  },
+  infoTextSmall: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  osBadge: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    backgroundColor: "#6366F1",
+    color: "white",
+    fontSize: 8,
+    padding: 2,
+    borderRadius: 4,
+    overflow: "hidden",
   },
 });
 
