@@ -1,0 +1,463 @@
+[
+  {
+    "id": 1,
+    "mac": "aa:bb:cc:dd:ee:01",
+    "hostname": "john-macbook",
+    "vendor": "Apple Inc.",
+    "given_name": "John's MacBook Pro",
+    "ip": "192.168.1.101",
+    "user_agent": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+    ],
+    "group": {
+      "id": 2,
+      "name": "Staff",
+      "is_default": false
+    },
+    "is_active": true,
+    "has_custom_blocklist": true,
+    "first_seen": "2024-01-15T08:30:00Z",
+    "last_seen": "2024-01-20T16:45:00Z",
+    "is_mac_universal": false,
+    "os_name": "macOS Sonoma",
+    "os_accuracy": 95,
+    "os_type": "desktop",
+    "os_vendor": "Apple",
+    "os_family": "macOS",
+    "os_gen": "14",
+    "os_cpe": [
+      "cpe:2.3:o:apple:macos:14:*:*:*:*:*:*:*"
+    ],
+    "os_last_updated": "2024-01-20T10:00:00Z",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": true,
+      "porn": true,
+      "gaming": true,
+      "streaming": true,
+      "facebook": false,
+      "instagram": true,
+      "tiktok": true,
+      "netflix": true,
+      "youtube": true,
+      "ai": true,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "computer",
+      "device_category": "laptop",
+      "confidence": 0.92,
+      "reasoning": "macOS user agent and hostname pattern indicate laptop",
+      "indicators": [
+        "macOS",
+        "laptop-style hostname",
+        "high mobility"
+      ],
+      "last_classified": "2024-01-20T10:00:00Z"
+    }
+  },
+  {
+    "id": 2,
+    "mac": "11:22:33:44:55:66",
+    "hostname": "samsung-tv-living",
+    "vendor": "Samsung Electronics",
+    "given_name": "Living Room TV",
+    "ip": "192.168.1.102",
+    "user_agent": [],
+    "group": {
+      "id": 4,
+      "name": "IoT",
+      "is_default": false
+    },
+    "is_active": true,
+    "has_custom_blocklist": true,
+    "first_seen": "2024-01-10T12:00:00Z",
+    "last_seen": "2024-01-20T23:30:00Z",
+    "is_mac_universal": false,
+    "os_name": "Tizen OS",
+    "os_accuracy": 87,
+    "os_type": "embedded",
+    "os_vendor": "Samsung",
+    "os_family": "Tizen",
+    "os_gen": "6.5",
+    "os_cpe": [
+      "cpe:2.3:o:samsung:tizen:6.5:*:*:*:*:*:*:*"
+    ],
+    "os_last_updated": "2024-01-19T20:15:00Z",
+    "blocklist": {
+      "ads_trackers": false,
+      "gambling": false,
+      "social_media": false,
+      "porn": false,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": true,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": false
+    },
+    "ai_classification": {
+      "device_type": "media_device",
+      "device_category": "smart_tv",
+      "confidence": 0.98,
+      "reasoning": "Samsung TV with Tizen OS, typical smart TV characteristics",
+      "indicators": [
+        "Tizen OS",
+        "Samsung TV vendor",
+        "media streaming capability"
+      ],
+      "last_classified": "2024-01-19T15:30:00Z"
+    }
+  },
+  {
+    "id": 3,
+    "mac": "ff:ee:dd:cc:bb:aa",
+    "hostname": "guest-iphone",
+    "vendor": "Apple Inc.",
+    "given_name": null,
+    "ip": "192.168.1.103",
+    "user_agent": [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X)"
+    ],
+    "group": {
+      "id": 3,
+      "name": "Guests",
+      "is_default": false
+    },
+    "is_active": false,
+    "has_custom_blocklist": true,
+    "first_seen": "2024-01-18T14:20:00Z",
+    "last_seen": "2024-01-18T18:45:00Z",
+    "is_mac_universal": true,
+    "os_name": "iOS",
+    "os_accuracy": 99,
+    "os_type": "mobile",
+    "os_vendor": "Apple",
+    "os_family": "iOS",
+    "os_gen": "17",
+    "os_cpe": [
+      "cpe:2.3:o:apple:iphone_os:17.2:*:*:*:*:*:*:*"
+    ],
+    "os_last_updated": "2024-01-18T15:00:00Z",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": false,
+      "porn": true,
+      "gaming": false,
+      "streaming": true,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "mobile_device",
+      "device_category": "smartphone",
+      "confidence": 0.99,
+      "reasoning": "iPhone user agent with iOS, clear mobile device signature",
+      "indicators": [
+        "iOS user agent",
+        "iPhone identifier",
+        "mobile screen resolution"
+      ],
+      "last_classified": "2024-01-18T14:25:00Z"
+    }
+  },
+  {
+    "id": 4,
+    "mac": "12:34:56:78:90:ab",
+    "hostname": "office-printer",
+    "vendor": "HP Inc.",
+    "given_name": "Office Printer",
+    "ip": "192.168.1.104",
+    "user_agent": [],
+    "group": {
+      "id": 2,
+      "name": "Staff",
+      "is_default": false
+    },
+    "is_active": true,
+    "has_custom_blocklist": true,
+    "first_seen": "2024-01-05T09:00:00Z",
+    "last_seen": "2024-01-20T17:00:00Z",
+    "is_mac_universal": false,
+    "os_name": "Embedded Linux",
+    "os_accuracy": 78,
+    "os_type": "embedded",
+    "os_vendor": "Various",
+    "os_family": "Linux",
+    "os_gen": "4.x",
+    "os_cpe": [
+      "cpe:2.3:o:linux:linux_kernel:4:*:*:*:*:*:*:*"
+    ],
+    "os_last_updated": "2024-01-15T12:00:00Z",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": true,
+      "porn": false,
+      "gaming": true,
+      "streaming": true,
+      "facebook": true,
+      "instagram": true,
+      "tiktok": true,
+      "netflix": true,
+      "youtube": true,
+      "ai": true,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "office_equipment",
+      "device_category": "printer",
+      "confidence": 0.85,
+      "reasoning": "HP vendor with printer hostname pattern and embedded Linux",
+      "indicators": [
+        "HP vendor",
+        "printer hostname",
+        "embedded OS",
+        "office network location"
+      ],
+      "last_classified": "2024-01-15T09:30:00Z"
+    }
+  },
+  {
+    "id": 5,
+    "mac": "98:76:54:32:10:fe",
+    "hostname": "gaming-console",
+    "vendor": "Sony Interactive Entertainment",
+    "given_name": "PlayStation 5",
+    "ip": "192.168.1.105",
+    "user_agent": [
+      "PlayStation 5"
+    ],
+    "group": {
+      "id": 1,
+      "name": "Default Group",
+      "is_default": true
+    },
+    "is_active": true,
+    "has_custom_blocklist": true,
+    "first_seen": "2024-01-12T19:30:00Z",
+    "last_seen": "2024-01-20T22:15:00Z",
+    "is_mac_universal": false,
+    "os_name": "PlayStation OS",
+    "os_accuracy": 94,
+    "os_type": "gaming",
+    "os_vendor": "Sony",
+    "os_family": "PlayStation",
+    "os_gen": "5",
+    "os_cpe": [
+      "cpe:2.3:o:sony:playstation_os:5:*:*:*:*:*:*:*"
+    ],
+    "os_last_updated": "2024-01-18T20:00:00Z",
+    "blocklist": {
+      "ads_trackers": false,
+      "gambling": true,
+      "social_media": false,
+      "porn": true,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": true,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "gaming_device",
+      "device_category": "gaming_console",
+      "confidence": 0.96,
+      "reasoning": "Sony PlayStation with gaming OS and user agent",
+      "indicators": [
+        "PlayStation user agent",
+        "Sony vendor",
+        "gaming network patterns"
+      ],
+      "last_classified": "2024-01-18T19:45:00Z"
+    }
+  },
+  {
+    "id": 6,
+    "mac": "ab:cd:ef:12:34:56",
+    "hostname": "smart-speaker",
+    "vendor": "Amazon Technologies Inc.",
+    "given_name": "Kitchen Echo",
+    "ip": "192.168.1.106",
+    "user_agent": [],
+    "group": {
+      "id": 4,
+      "name": "IoT",
+      "is_default": false
+    },
+    "is_active": true,
+    "has_custom_blocklist": false,
+    "first_seen": "2024-01-08T10:15:00Z",
+    "last_seen": "2024-01-20T23:59:00Z",
+    "is_mac_universal": false,
+    "os_name": "Fire OS",
+    "os_accuracy": 89,
+    "os_type": "embedded",
+    "os_vendor": "Amazon",
+    "os_family": "Fire OS",
+    "os_gen": "7",
+    "os_cpe": [
+      "cpe:2.3:o:amazon:fire_os:7:*:*:*:*:*:*:*"
+    ],
+    "os_last_updated": "2024-01-16T14:30:00Z",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": false,
+      "porn": true,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "smart_home",
+      "device_category": "smart_speaker",
+      "confidence": 0.93,
+      "reasoning": "Amazon Echo device with Fire OS and smart home patterns",
+      "indicators": [
+        "Amazon vendor",
+        "Fire OS",
+        "always-on connectivity",
+        "voice command patterns"
+      ],
+      "last_classified": "2024-01-16T11:00:00Z"
+    }
+  },
+  {
+    "id": 7,
+    "mac": "de:ad:be:ef:ca:fe",
+    "hostname": "work-laptop",
+    "vendor": "Dell Inc.",
+    "given_name": "Sarah's Work Laptop",
+    "ip": "192.168.1.107",
+    "user_agent": [
+      "Mozilla/5.0 (Windows NT 11.0; Win64; x64)"
+    ],
+    "group": {
+      "id": 2,
+      "name": "Staff",
+      "is_default": false
+    },
+    "is_active": true,
+    "has_custom_blocklist": true,
+    "first_seen": "2024-01-14T07:45:00Z",
+    "last_seen": "2024-01-20T18:30:00Z",
+    "is_mac_universal": false,
+    "os_name": "Windows 11",
+    "os_accuracy": 97,
+    "os_type": "desktop",
+    "os_vendor": "Microsoft",
+    "os_family": "Windows",
+    "os_gen": "11",
+    "os_cpe": [
+      "cpe:2.3:o:microsoft:windows_11:-:*:*:*:*:*:*:*"
+    ],
+    "os_last_updated": "2024-01-19T09:00:00Z",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": true,
+      "porn": true,
+      "gaming": true,
+      "streaming": false,
+      "facebook": true,
+      "instagram": true,
+      "tiktok": true,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "computer",
+      "device_category": "laptop",
+      "confidence": 0.94,
+      "reasoning": "Windows 11 laptop with Dell vendor and work usage patterns",
+      "indicators": [
+        "Windows user agent",
+        "Dell vendor",
+        "business hours usage",
+        "work hostname"
+      ],
+      "last_classified": "2024-01-19T08:15:00Z"
+    }
+  },
+  {
+    "id": 8,
+    "mac": "ba:dc:af:fe:ba:be",
+    "hostname": "android-tablet",
+    "vendor": "Samsung Electronics",
+    "given_name": null,
+    "ip": "192.168.1.108",
+    "user_agent": [
+      "Mozilla/5.0 (Linux; Android 13; SM-T870)"
+    ],
+    "group": {
+      "id": 3,
+      "name": "Guests",
+      "is_default": false
+    },
+    "is_active": false,
+    "has_custom_blocklist": false,
+    "first_seen": "2024-01-17T15:20:00Z",
+    "last_seen": "2024-01-19T11:30:00Z",
+    "is_mac_universal": false,
+    "os_name": "Android",
+    "os_accuracy": 98,
+    "os_type": "mobile",
+    "os_vendor": "Google",
+    "os_family": "Android",
+    "os_gen": "13",
+    "os_cpe": [
+      "cpe:2.3:o:google:android:13:*:*:*:*:*:*:*"
+    ],
+    "os_last_updated": "2024-01-17T16:00:00Z",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": false,
+      "porn": true,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "mobile_device",
+      "device_category": "tablet",
+      "confidence": 0.91,
+      "reasoning": "Android tablet with Samsung vendor and tablet model identifier",
+      "indicators": [
+        "Android user agent",
+        "Samsung tablet model",
+        "tablet screen resolution"
+      ],
+      "last_classified": "2024-01-17T15:45:00Z"
+    }
+  }
+]
