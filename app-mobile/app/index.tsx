@@ -115,8 +115,14 @@ const DeviceVizMobile = () => {
 
       if (response.ok) {
         await fetchData();
-        setModalVisible(false);
-        Alert.alert("Success", `Action "${action}" completed successfully.`);
+        // Do not close modal here; let user close it manually
+        // Optionally show a success message for isolate/release
+        if (action !== "toggle_block") {
+          Alert.alert(
+            "Success",
+            `Action \"${action}\" completed successfully.`
+          );
+        }
       } else {
         throw new Error("Action failed");
       }
@@ -133,6 +139,10 @@ const DeviceVizMobile = () => {
       IoT: "📹",
       Printer: "🖨️",
       Workstation: "💻",
+      "File Server": "🗄️",
+      Gateway: "🚪",
+      "Lobby AP": "📶",
+      NAS: "💾",
     };
     return icons[String(category) as keyof typeof icons] || "💻";
   };
@@ -174,81 +184,96 @@ const DeviceVizMobile = () => {
   }, [devices, searchTerm, filterGroup]);
 
   const ConstellationView = () => {
-    const centerX = screenWidth * 0.5;
-    const centerY = 200;
-    const baseRadius = 80;
+    const containerHeight = 400;
+    const centerX = screenWidth * 0.5 - 20;
+    const centerY = containerHeight * 0.5;
+    const circleRadius = 140; // increased radius for more spacing
 
     return (
-      <View style={styles.constellationContainer}>
-        <View style={styles.constellationCenter}>
+      <View
+        style={[
+          styles.constellationContainer,
+          {
+            width: screenWidth,
+            height: containerHeight,
+            alignItems: "center",
+            justifyContent: "center",
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.constellationCenter,
+            { left: centerX - 30, top: centerY - 30 },
+          ]}
+        >
           <Text style={styles.centerText}>🌐</Text>
           <Text style={styles.centerLabel}>Network</Text>
         </View>
 
         {filteredDevices.map((device, index) => {
           const angle = (index / filteredDevices.length) * 2 * Math.PI;
-          const riskMultiplier = getRiskLevel(device) === "high" ? 1.4 : 1;
-          const radius = baseRadius * riskMultiplier;
-          const x = centerX + radius * Math.cos(angle) - 25;
-          const y = centerY + radius * Math.sin(angle) - 25;
+          const x = centerX + circleRadius * Math.cos(angle) - 30;
+          const y = centerY + circleRadius * Math.sin(angle) - 30;
 
           const riskColor = getRiskColor(getRiskLevel(device));
           const groupColor = getGroupColor(device.group.name);
 
           return (
-            <TouchableOpacity
+            <View
               key={device.id}
-              style={[
-                styles.deviceNode,
-                {
-                  left: x,
-                  top: y,
-                  backgroundColor: groupColor,
-                  borderColor: riskColor,
-                  borderWidth: 3,
-                  opacity: device.is_active ? 1 : 0.6,
-                },
-              ]}
-              onPress={() => {
-                setSelectedDevice(device);
-                setModalVisible(true);
+              style={{
+                position: "absolute",
+                left: x,
+                top: y,
+                alignItems: "center",
+                width: 60,
               }}
             >
-              <Text style={styles.deviceIcon}>
-                {getDeviceIcon(device.ai_classification.device_category)}
-              </Text>
-
-              {/* Activity indicator */}
+              <TouchableOpacity
+                style={[
+                  styles.deviceNode,
+                  {
+                    backgroundColor: groupColor,
+                    borderColor: riskColor,
+                    borderWidth: 3,
+                    opacity: device.is_active ? 1 : 0.6,
+                  },
+                ]}
+                onPress={() => {
+                  setSelectedDevice(device);
+                  setModalVisible(true);
+                }}
+              >
+                <Text style={styles.deviceIcon}>
+                  {getDeviceIcon(device.ai_classification.device_category)}
+                </Text>
+                {/* Activity indicator */}
+                <View
+                  style={[
+                    styles.activityIndicator,
+                    {
+                      backgroundColor: device.is_active ? "#22C55E" : "#6B7280",
+                    },
+                  ]}
+                />
+                {/* Risk pulse ring */}
+                {getRiskLevel(device) === "high" && (
+                  <View
+                    style={[styles.riskPulse, { borderColor: riskColor }]}
+                  />
+                )}
+              </TouchableOpacity>
               <View
                 style={[
-                  styles.activityIndicator,
-                  { backgroundColor: device.is_active ? "#22C55E" : "#6B7280" },
+                  styles.deviceLabel,
+                  { position: "relative", left: 0, top: 50, width: 80 },
                 ]}
-              />
-
-              {/* Risk pulse ring */}
-              {getRiskLevel(device) === "high" && (
-                <View style={[styles.riskPulse, { borderColor: riskColor }]} />
-              )}
-            </TouchableOpacity>
-          );
-        })}
-
-        {/* Device labels */}
-        {filteredDevices.map((device, index) => {
-          const angle = (index / filteredDevices.length) * 2 * Math.PI;
-          const radius = baseRadius * 1.6;
-          const x = centerX + radius * Math.cos(angle);
-          const y = centerY + radius * Math.sin(angle);
-
-          return (
-            <View
-              key={`label-${device.id}`}
-              style={[styles.deviceLabel, { left: x - 40, top: y - 10 }]}
-            >
-              <Text style={styles.labelText} numberOfLines={1}>
-                {device.given_name}
-              </Text>
+              >
+                <Text style={styles.labelText} numberOfLines={1}>
+                  {device.given_name}
+                </Text>
+              </View>
             </View>
           );
         })}
@@ -381,7 +406,104 @@ const DeviceVizMobile = () => {
   const DeviceDetailModal = () => {
     if (!selectedDevice) return null;
 
-    const blocklistCategories = Object.entries(selectedDevice.blocklist);
+    const [optimisticDevice, setOptimisticDevice] = useState(selectedDevice);
+    useEffect(() => {
+      setOptimisticDevice(selectedDevice);
+    }, [selectedDevice]);
+
+    const blocklistCategories = Object.entries(optimisticDevice.blocklist);
+
+    // Optimistic toggle handler for blocklist
+    const handleBlocklistToggle = async (category: string) => {
+      const newBlocklist = {
+        ...optimisticDevice.blocklist,
+        [category]: !optimisticDevice.blocklist[category],
+      };
+      setOptimisticDevice({ ...optimisticDevice, blocklist: newBlocklist });
+      setSelectedDevice((prev) =>
+        prev ? { ...prev, blocklist: newBlocklist } : prev
+      );
+      setDevices((prev) =>
+        prev.map((d) =>
+          d.id === optimisticDevice.id ? { ...d, blocklist: newBlocklist } : d
+        )
+      );
+      try {
+        const body = { action: "toggle_block", category };
+        const response = await fetch(
+          `${API_BASE}/api/devices/${optimisticDevice.id}/actions`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }
+        );
+        if (!response.ok) throw new Error("Action failed");
+      } catch (error) {
+        const revertedBlocklist = {
+          ...optimisticDevice.blocklist,
+          [category]: !newBlocklist[category],
+        };
+        setOptimisticDevice({
+          ...optimisticDevice,
+          blocklist: revertedBlocklist,
+        });
+        setSelectedDevice((prev) =>
+          prev ? { ...prev, blocklist: revertedBlocklist } : prev
+        );
+        setDevices((prev) =>
+          prev.map((d) =>
+            d.id === optimisticDevice.id
+              ? { ...d, blocklist: revertedBlocklist }
+              : d
+          )
+        );
+        Alert.alert("Error", "Failed to update blocklist. Please try again.");
+      }
+    };
+
+    // Optimistic handler for isolate/release
+    const handleQuickAction = async (action: "isolate" | "release") => {
+      // Optimistically update is_active (assume isolate = false, release = true)
+      const newIsActive = action === "release";
+      setOptimisticDevice({ ...optimisticDevice, is_active: newIsActive });
+      setSelectedDevice((prev) =>
+        prev ? { ...prev, is_active: newIsActive } : prev
+      );
+      setDevices((prev) =>
+        prev.map((d) =>
+          d.id === optimisticDevice.id ? { ...d, is_active: newIsActive } : d
+        )
+      );
+      try {
+        const body = { action };
+        const response = await fetch(
+          `${API_BASE}/api/devices/${optimisticDevice.id}/actions`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }
+        );
+        if (!response.ok) throw new Error("Action failed");
+        Alert.alert("Success", `Action \"${action}\" completed successfully.`);
+      } catch (error) {
+        // Revert optimistic update on error
+        setOptimisticDevice({ ...optimisticDevice, is_active: !newIsActive });
+        setSelectedDevice((prev) =>
+          prev ? { ...prev, is_active: !newIsActive } : prev
+        );
+        setDevices((prev) =>
+          prev.map((d) =>
+            d.id === optimisticDevice.id ? { ...d, is_active: !newIsActive } : d
+          )
+        );
+        Alert.alert(
+          "Error",
+          `Failed to perform action \"${action}\". Please try again.`
+        );
+      }
+    };
 
     return (
       <Modal
@@ -397,12 +519,12 @@ const DeviceVizMobile = () => {
               <View style={styles.modalHeader}>
                 <View style={styles.modalHeaderContent}>
                   <Text style={styles.modalTitle}>
-                    {selectedDevice.given_name}
+                    {optimisticDevice.given_name}
                   </Text>
                   <Text style={styles.modalSubtitle}>
-                    {selectedDevice.hostname} • {selectedDevice.vendor}
+                    {optimisticDevice.hostname} • {optimisticDevice.vendor}
                   </Text>
-                  <Text style={styles.modalIP}>{selectedDevice.ip}</Text>
+                  <Text style={styles.modalIP}>{optimisticDevice.ip}</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.closeButton}
@@ -418,14 +540,14 @@ const DeviceVizMobile = () => {
                   style={[
                     styles.statusBadge,
                     {
-                      backgroundColor: selectedDevice.is_active
+                      backgroundColor: optimisticDevice.is_active
                         ? "#22C55E"
                         : "#6B7280",
                     },
                   ]}
                 >
                   <Text style={styles.statusText}>
-                    {selectedDevice.is_active ? "🟢 Online" : "🔴 Offline"}
+                    {optimisticDevice.is_active ? "🟢 Online" : "🔴 Offline"}
                   </Text>
                 </View>
 
@@ -434,13 +556,13 @@ const DeviceVizMobile = () => {
                     styles.riskBadge,
                     {
                       backgroundColor: getRiskColor(
-                        getRiskLevel(selectedDevice)
+                        getRiskLevel(optimisticDevice)
                       ),
                     },
                   ]}
                 >
                   <Text style={styles.riskText}>
-                    {getRiskLevel(selectedDevice).toUpperCase()} RISK
+                    {getRiskLevel(optimisticDevice).toUpperCase()} RISK
                   </Text>
                 </View>
               </View>
@@ -452,26 +574,26 @@ const DeviceVizMobile = () => {
                   <View style={styles.infoItem}>
                     <Ionicons name="hardware-chip" size={16} color="#6366F1" />
                     <Text style={styles.infoText}>
-                      {selectedDevice.ai_classification.device_type}
+                      {optimisticDevice.ai_classification.device_type}
                     </Text>
                   </View>
                   <View style={styles.infoItem}>
                     <Ionicons name="laptop" size={16} color="#6366F1" />
                     <Text style={styles.infoText}>
-                      {selectedDevice.os_name}
+                      {optimisticDevice.os_name}
                     </Text>
                   </View>
                   <View style={styles.infoItem}>
                     <Ionicons name="people" size={16} color="#6366F1" />
                     <Text style={styles.infoText}>
-                      {selectedDevice.group.name}
+                      {optimisticDevice.group.name}
                     </Text>
                   </View>
                   <View style={styles.infoItem}>
                     <Ionicons name="stats-chart" size={16} color="#6366F1" />
                     <Text style={styles.infoText}>
                       {Math.round(
-                        selectedDevice.ai_classification.confidence * 100
+                        optimisticDevice.ai_classification.confidence * 100
                       )}
                       % Confidence
                     </Text>
@@ -485,14 +607,14 @@ const DeviceVizMobile = () => {
                 <View style={styles.actionButtons}>
                   <TouchableOpacity
                     style={[styles.actionButton, styles.isolateButton]}
-                    onPress={() => performAction(selectedDevice.id, "isolate")}
+                    onPress={() => handleQuickAction("isolate")}
                   >
                     <Ionicons name="lock-closed" size={20} color="#FFFFFF" />
                     <Text style={styles.actionButtonText}>Isolate</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.actionButton, styles.releaseButton]}
-                    onPress={() => performAction(selectedDevice.id, "release")}
+                    onPress={() => handleQuickAction("release")}
                   >
                     <Ionicons name="lock-open" size={20} color="#FFFFFF" />
                     <Text style={styles.actionButtonText}>Release</Text>
@@ -511,13 +633,7 @@ const DeviceVizMobile = () => {
                         styles.blocklistItem,
                         { backgroundColor: blocked ? "#FEE2E2" : "#F3F4F6" },
                       ]}
-                      onPress={() =>
-                        performAction(
-                          selectedDevice.id,
-                          "toggle_block",
-                          category
-                        )
-                      }
+                      onPress={() => handleBlocklistToggle(category)}
                     >
                       <Text
                         style={[
@@ -582,7 +698,12 @@ const DeviceVizMobile = () => {
       {/* Controls */}
       <View style={styles.controls}>
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#9CA3AF" style={styles.searchIcon} />
+          <Ionicons
+            name="search"
+            size={20}
+            color="#9CA3AF"
+            style={styles.searchIcon}
+          />
           <TextInput
             style={styles.searchInput}
             placeholder="Search devices..."
@@ -599,7 +720,12 @@ const DeviceVizMobile = () => {
 
         <View style={styles.filterRow}>
           <View style={styles.pickerContainer}>
-            <Ionicons name="filter" size={16} color="#6B7280" style={styles.filterIcon} />
+            <Ionicons
+              name="filter"
+              size={16}
+              color="#6B7280"
+              style={styles.filterIcon}
+            />
             <Picker
               selectedValue={filterGroup}
               onValueChange={setFilterGroup}
@@ -617,7 +743,7 @@ const DeviceVizMobile = () => {
           {[
             { key: "constellation", icon: "planet" },
             { key: "heatmap", icon: "grid" },
-            { key: "network", icon: "git-network" }
+            { key: "network", icon: "git-network" },
           ].map((mode) => (
             <TouchableOpacity
               key={mode.key}
@@ -627,10 +753,10 @@ const DeviceVizMobile = () => {
               ]}
               onPress={() => setViewMode(mode.key)}
             >
-              <Ionicons 
-                name={mode.icon as any} 
-                size={20} 
-                color={viewMode === mode.key ? "#FFFFFF" : "#6B7280"} 
+              <Ionicons
+                name={mode.icon as any}
+                size={20}
+                color={viewMode === mode.key ? "#FFFFFF" : "#6B7280"}
               />
               <Text
                 style={[
@@ -646,7 +772,7 @@ const DeviceVizMobile = () => {
       </View>
 
       {/* Main Visualization */}
-      <ScrollView 
+      <ScrollView
         style={styles.visualizationContainer}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

@@ -31,10 +31,10 @@
     ],
     "os_last_updated": "2025-08-29T10:11:22.101001",
     "blocklist": {
-      "ads_trackers": true,
-      "gambling": true,
+      "ads_trackers": false,
+      "gambling": false,
       "social_media": false,
-      "porn": true,
+      "porn": false,
       "gaming": false,
       "streaming": false,
       "facebook": false,
@@ -69,7 +69,7 @@
       "UAP/6.5 EdgeOS"
     ],
     "is_active": true,
-    "has_custom_blocklist": false,
+    "has_custom_blocklist": true,
     "group": {
       "id": 4,
       "name": "IoT",
@@ -101,7 +101,7 @@
       "netflix": false,
       "youtube": false,
       "ai": false,
-      "safesearch": false
+      "safesearch": true
     },
     "ai_classification": {
       "device_type": "Access Point",
@@ -147,9 +147,9 @@
     "os_last_updated": "2025-08-29T18:30:25.430957",
     "blocklist": {
       "ads_trackers": true,
-      "gambling": false,
+      "gambling": true,
       "social_media": false,
-      "porn": false,
+      "porn": true,
       "gaming": false,
       "streaming": false,
       "facebook": false,
@@ -183,7 +183,7 @@
       "Mozilla/5.0 (Linux; Android 14; Pixel 7) Chrome/126.0 Mobile Safari/537.36"
     ],
     "is_active": true,
-    "has_custom_blocklist": false,
+    "has_custom_blocklist": true,
     "group": {
       "id": 2,
       "name": "Staff",
@@ -205,16 +205,16 @@
     "blocklist": {
       "ads_trackers": true,
       "gambling": true,
-      "social_media": false,
+      "social_media": true,
       "porn": true,
-      "gaming": false,
-      "streaming": false,
-      "facebook": false,
-      "instagram": false,
-      "tiktok": false,
-      "netflix": false,
-      "youtube": false,
-      "ai": false,
+      "gaming": true,
+      "streaming": true,
+      "facebook": true,
+      "instagram": true,
+      "tiktok": true,
+      "netflix": true,
+      "youtube": true,
+      "ai": true,
       "safesearch": true
     },
     "ai_classification": {
@@ -297,7 +297,7 @@
       "SynologyDS/7.2.1"
     ],
     "is_active": true,
-    "has_custom_blocklist": false,
+    "has_custom_blocklist": true,
     "group": {
       "id": 4,
       "name": "IoT",
@@ -319,15 +319,15 @@
     "blocklist": {
       "ads_trackers": false,
       "gambling": false,
-      "social_media": true,
-      "porn": true,
-      "gaming": true,
-      "streaming": true,
-      "facebook": true,
-      "instagram": true,
-      "tiktok": true,
-      "netflix": true,
-      "youtube": true,
+      "social_media": false,
+      "porn": false,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
       "ai": false,
       "safesearch": true
     },
@@ -353,7 +353,7 @@
       "curl/8.7.1"
     ],
     "is_active": false,
-    "has_custom_blocklist": false,
+    "has_custom_blocklist": true,
     "group": {
       "id": 1,
       "name": "Default Group",
@@ -373,19 +373,19 @@
     ],
     "os_last_updated": "2025-08-13T19:00:25.430957",
     "blocklist": {
-      "ads_trackers": false,
-      "gambling": false,
-      "social_media": false,
-      "porn": false,
-      "gaming": false,
-      "streaming": false,
-      "facebook": false,
-      "instagram": false,
-      "tiktok": false,
-      "netflix": false,
-      "youtube": false,
-      "ai": false,
-      "safesearch": false
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": true,
+      "porn": true,
+      "gaming": true,
+      "streaming": true,
+      "facebook": true,
+      "instagram": true,
+      "tiktok": true,
+      "netflix": true,
+      "youtube": true,
+      "ai": true,
+      "safesearch": true
     },
     "ai_classification": {
       "device_type": "Network attached storage",
@@ -467,7 +467,7 @@
       "HP JetDirect/73.1"
     ],
     "is_active": false,
-    "has_custom_blocklist": false,
+    "has_custom_blocklist": true,
     "group": {
       "id": 3,
       "name": "Guests",
@@ -485,8 +485,8 @@
     "os_cpe": [],
     "os_last_updated": "2025-08-28T18:01:25.430957",
     "blocklist": {
-      "ads_trackers": false,
-      "gambling": false,
+      "ads_trackers": true,
+      "gambling": true,
       "social_media": true,
       "porn": true,
       "gaming": true,
@@ -521,7 +521,7 @@
       "Mozilla/5.0 (X11; Ubuntu 22.04)"
     ],
     "is_active": true,
-    "has_custom_blocklist": false,
+    "has_custom_blocklist": true,
     "group": {
       "id": 2,
       "name": "Staff",
@@ -543,15 +543,15 @@
     "blocklist": {
       "ads_trackers": false,
       "gambling": false,
-      "social_media": true,
-      "porn": true,
-      "gaming": true,
-      "streaming": true,
-      "facebook": true,
-      "instagram": true,
-      "tiktok": true,
-      "netflix": true,
-      "youtube": true,
+      "social_media": false,
+      "porn": false,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
       "ai": false,
       "safesearch": true
     },
