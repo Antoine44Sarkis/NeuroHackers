@@ -1,0 +1,570 @@
+[
+  {
+    "id": 1,
+    "mac": "02:42:AC:11:00:01",
+    "hostname": "chimera-gw",
+    "vendor": "Raspberry Pi",
+    "given_name": "Gateway",
+    "ip": "192.168.69.1",
+    "user_agent": [
+      "Suricata/7.0",
+      "unbound/1.19.0"
+    ],
+    "is_active": true,
+    "has_custom_blocklist": true,
+    "group": {
+      "id": 1,
+      "name": "Default Group",
+      "is_default": true
+    },
+    "first_seen": "2025-08-12T09:15:03.102311",
+    "last_seen": "2025-08-30T01:22:45.902311",
+    "is_mac_universal": false,
+    "os_name": "Linux 6.1",
+    "os_accuracy": 98,
+    "os_type": "embedded",
+    "os_vendor": "Linux",
+    "os_family": "Linux",
+    "os_gen": "6.X",
+    "os_cpe": [
+      "cpe:/o:linux:linux_kernel:6"
+    ],
+    "os_last_updated": "2025-08-29T10:11:22.101001",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": false,
+      "porn": true,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "Gateway",
+      "device_category": "Network Infrastructure",
+      "confidence": 0.99,
+      "reasoning": "Chimera services + router role on LAN .1",
+      "indicators": [
+        "Suricata",
+        "Unbound",
+        "LAN gateway IP"
+      ],
+      "last_classified": "2025-08-29T10:12:05.331001"
+    }
+  },
+  {
+    "id": 2,
+    "mac": "B8:27:EB:10:22:33",
+    "hostname": "ap-lobby",
+    "vendor": "Ubiquiti",
+    "given_name": "Lobby AP",
+    "ip": "192.168.69.2",
+    "user_agent": [
+      "UAP/6.5 EdgeOS"
+    ],
+    "is_active": true,
+    "has_custom_blocklist": false,
+    "group": {
+      "id": 4,
+      "name": "IoT",
+      "is_default": false
+    },
+    "first_seen": "2025-08-12T09:16:44.221001",
+    "last_seen": "2025-08-30T01:21:02.991001",
+    "is_mac_universal": false,
+    "os_name": "EdgeOS 2.x",
+    "os_accuracy": 92,
+    "os_type": "embedded",
+    "os_vendor": "Ubiquiti",
+    "os_family": "EdgeOS",
+    "os_gen": "2.X",
+    "os_cpe": [
+      "cpe:/o:ubnt:edgeos:2"
+    ],
+    "os_last_updated": "2025-08-28T14:02:18.101001",
+    "blocklist": {
+      "ads_trackers": false,
+      "gambling": false,
+      "social_media": false,
+      "porn": false,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": false
+    },
+    "ai_classification": {
+      "device_type": "Access Point",
+      "device_category": "Network Infrastructure",
+      "confidence": 0.96,
+      "reasoning": "Ubiquiti AP UA; fixed IP",
+      "indicators": [
+        "EdgeOS",
+        "UAP signature"
+      ],
+      "last_classified": "2025-08-28T14:05:55.331001"
+    }
+  },
+  {
+    "id": 3,
+    "mac": "E4:5F:01:22:33:44",
+    "hostname": "ceo-mac",
+    "vendor": "Apple",
+    "given_name": "CEO MacBook",
+    "ip": "192.168.69.25",
+    "user_agent": [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) Safari/605.1.15"
+    ],
+    "is_active": true,
+    "has_custom_blocklist": true,
+    "group": {
+      "id": 2,
+      "name": "Staff",
+      "is_default": false
+    },
+    "first_seen": "2025-08-13T07:11:08.252811",
+    "last_seen": "2025-08-30T01:20:11.252551",
+    "is_mac_universal": false,
+    "os_name": "macOS 14.5",
+    "os_accuracy": 99,
+    "os_type": "general purpose",
+    "os_vendor": "Apple",
+    "os_family": "macOS",
+    "os_gen": "14.X",
+    "os_cpe": [
+      "cpe:/o:apple:macos:14"
+    ],
+    "os_last_updated": "2025-08-29T18:30:25.430957",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": false,
+      "social_media": false,
+      "porn": false,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "Workstation",
+      "device_category": "Workstation",
+      "confidence": 0.93,
+      "reasoning": "macOS UA; staff group",
+      "indicators": [
+        "macOS",
+        "Staff group"
+      ],
+      "last_classified": "2025-08-29T18:32:19.673657"
+    }
+  },
+  {
+    "id": 4,
+    "mac": "DA:7A:3C:90:11:22",
+    "hostname": "pixel-7",
+    "vendor": "Google",
+    "given_name": "CEO Phone",
+    "ip": "192.168.69.51",
+    "user_agent": [
+      "Mozilla/5.0 (Linux; Android 14; Pixel 7) Chrome/126.0 Mobile Safari/537.36"
+    ],
+    "is_active": true,
+    "has_custom_blocklist": false,
+    "group": {
+      "id": 2,
+      "name": "Staff",
+      "is_default": false
+    },
+    "first_seen": "2025-08-13T10:40:21.102311",
+    "last_seen": "2025-08-30T01:22:00.902311",
+    "is_mac_universal": true,
+    "os_name": "Android 14",
+    "os_accuracy": 97,
+    "os_type": "mobile",
+    "os_vendor": "Google",
+    "os_family": "Android",
+    "os_gen": "14",
+    "os_cpe": [
+      "cpe:/o:google:android:14"
+    ],
+    "os_last_updated": "2025-08-27T08:09:50.101001",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": false,
+      "porn": true,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "Smartphone",
+      "device_category": "Mobile",
+      "confidence": 0.91,
+      "reasoning": "Android UA; randomized MAC",
+      "indicators": [
+        "Android UA",
+        "Private MAC"
+      ],
+      "last_classified": "2025-08-27T08:10:33.331001"
+    }
+  },
+  {
+    "id": 5,
+    "mac": "14:AE:DB:90:11:22",
+    "hostname": "lobby-tv",
+    "vendor": "Samsung",
+    "given_name": "Lobby TV",
+    "ip": "192.168.69.80",
+    "user_agent": [
+      "Mozilla/5.0 (SMART-TV; Tizen 7.0) AppleWebKit/537.36"
+    ],
+    "is_active": true,
+    "has_custom_blocklist": true,
+    "group": {
+      "id": 4,
+      "name": "IoT",
+      "is_default": false
+    },
+    "first_seen": "2025-08-13T19:00:08.252811",
+    "last_seen": "2025-08-30T00:59:31.252551",
+    "is_mac_universal": false,
+    "os_name": "Tizen 7.0",
+    "os_accuracy": 93,
+    "os_type": "iot",
+    "os_vendor": "Samsung",
+    "os_family": "Tizen",
+    "os_gen": "7.0",
+    "os_cpe": [
+      "cpe:/o:samsung:tizen:7"
+    ],
+    "os_last_updated": "2025-08-28T09:20:25.430957",
+    "blocklist": {
+      "ads_trackers": false,
+      "gambling": false,
+      "social_media": false,
+      "porn": false,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "Smart TV",
+      "device_category": "IoT",
+      "confidence": 0.94,
+      "reasoning": "Tizen UA; IoT group",
+      "indicators": [
+        "Tizen",
+        "Smart-TV UA"
+      ],
+      "last_classified": "2025-08-28T09:21:19.673657"
+    }
+  },
+  {
+    "id": 6,
+    "mac": "52:54:00:AA:BB:CC",
+    "hostname": "nas-01",
+    "vendor": "Synology",
+    "given_name": "NAS",
+    "ip": "192.168.69.20",
+    "user_agent": [
+      "SynologyDS/7.2.1"
+    ],
+    "is_active": true,
+    "has_custom_blocklist": false,
+    "group": {
+      "id": 4,
+      "name": "IoT",
+      "is_default": false
+    },
+    "first_seen": "2025-08-13T19:00:08.235974",
+    "last_seen": "2025-08-30T01:10:08.235547",
+    "is_mac_universal": false,
+    "os_name": "Linux 4.4",
+    "os_accuracy": 96,
+    "os_type": "embedded",
+    "os_vendor": "Linux",
+    "os_family": "Linux",
+    "os_gen": "4.X",
+    "os_cpe": [
+      "cpe:/o:linux:linux_kernel:4.4"
+    ],
+    "os_last_updated": "2025-08-29T07:03:09.674192",
+    "blocklist": {
+      "ads_trackers": false,
+      "gambling": false,
+      "social_media": true,
+      "porn": true,
+      "gaming": true,
+      "streaming": true,
+      "facebook": true,
+      "instagram": true,
+      "tiktok": true,
+      "netflix": true,
+      "youtube": true,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "Network attached storage",
+      "device_category": "Network Infrastructure",
+      "confidence": 0.95,
+      "reasoning": "Synology UA; SMB services",
+      "indicators": [
+        "Synology UA"
+      ],
+      "last_classified": "2025-08-29T07:10:54.234139"
+    }
+  },
+  {
+    "id": 7,
+    "mac": "AC:45:EF:07:A7:D3",
+    "hostname": "Unknown",
+    "vendor": "Unknown",
+    "given_name": "Unassigned",
+    "ip": "192.168.69.183",
+    "user_agent": [
+      "curl/8.7.1"
+    ],
+    "is_active": false,
+    "has_custom_blocklist": false,
+    "group": {
+      "id": 1,
+      "name": "Default Group",
+      "is_default": true
+    },
+    "first_seen": "2025-08-13T19:00:08.252811",
+    "last_seen": "2025-08-13T19:00:08.252551",
+    "is_mac_universal": true,
+    "os_name": "Linux 4.15 - 5.6",
+    "os_accuracy": 100,
+    "os_type": "general purpose",
+    "os_vendor": "Linux",
+    "os_family": "Linux",
+    "os_gen": "4.X",
+    "os_cpe": [
+      "cpe:/o:linux:linux_kernel:4"
+    ],
+    "os_last_updated": "2025-08-13T19:00:25.430957",
+    "blocklist": {
+      "ads_trackers": false,
+      "gambling": false,
+      "social_media": false,
+      "porn": false,
+      "gaming": false,
+      "streaming": false,
+      "facebook": false,
+      "instagram": false,
+      "tiktok": false,
+      "netflix": false,
+      "youtube": false,
+      "ai": false,
+      "safesearch": false
+    },
+    "ai_classification": {
+      "device_type": "Network attached storage",
+      "device_category": "Network Infrastructure",
+      "confidence": 0.95,
+      "reasoning": "Linux server pattern; general purpose",
+      "indicators": [
+        "Linux OS",
+        "headless UA"
+      ],
+      "last_classified": "2025-08-13T19:12:19.673657"
+    }
+  },
+  {
+    "id": 8,
+    "mac": "90:2B:34:55:66:77",
+    "hostname": "cam-east",
+    "vendor": "Hikvision",
+    "given_name": "Entrance Cam",
+    "ip": "192.168.69.90",
+    "user_agent": [
+      "HiLinux/3.10 RTSP"
+    ],
+    "is_active": true,
+    "has_custom_blocklist": true,
+    "group": {
+      "id": 4,
+      "name": "IoT",
+      "is_default": false
+    },
+    "first_seen": "2025-08-13T09:50:08.252811",
+    "last_seen": "2025-08-30T01:05:31.252551",
+    "is_mac_universal": false,
+    "os_name": "Linux 3.10",
+    "os_accuracy": 87,
+    "os_type": "iot",
+    "os_vendor": "Linux",
+    "os_family": "Linux",
+    "os_gen": "3.X",
+    "os_cpe": [
+      "cpe:/o:linux:linux_kernel:3.10"
+    ],
+    "os_last_updated": "2025-08-28T12:00:25.430957",
+    "blocklist": {
+      "ads_trackers": true,
+      "gambling": true,
+      "social_media": true,
+      "porn": true,
+      "gaming": true,
+      "streaming": true,
+      "facebook": true,
+      "instagram": true,
+      "tiktok": true,
+      "netflix": true,
+      "youtube": true,
+      "ai": true,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "IP Camera",
+      "device_category": "IoT",
+      "confidence": 0.92,
+      "reasoning": "RTSP UA; camera vendor",
+      "indicators": [
+        "RTSP",
+        "Hikvision OUI"
+      ],
+      "last_classified": "2025-08-28T12:01:19.673657"
+    }
+  },
+  {
+    "id": 9,
+    "mac": "00:1F:A0:12:34:56",
+    "hostname": "hp-laser",
+    "vendor": "HP",
+    "given_name": "Printer",
+    "ip": "192.168.69.60",
+    "user_agent": [
+      "HP JetDirect/73.1"
+    ],
+    "is_active": false,
+    "has_custom_blocklist": false,
+    "group": {
+      "id": 3,
+      "name": "Guests",
+      "is_default": false
+    },
+    "first_seen": "2025-08-13T12:00:08.252811",
+    "last_seen": "2025-08-28T18:01:31.252551",
+    "is_mac_universal": false,
+    "os_name": "Embedded RTOS",
+    "os_accuracy": 70,
+    "os_type": "printer",
+    "os_vendor": "HP",
+    "os_family": "JetDirect",
+    "os_gen": "73.1",
+    "os_cpe": [],
+    "os_last_updated": "2025-08-28T18:01:25.430957",
+    "blocklist": {
+      "ads_trackers": false,
+      "gambling": false,
+      "social_media": true,
+      "porn": true,
+      "gaming": true,
+      "streaming": true,
+      "facebook": true,
+      "instagram": true,
+      "tiktok": true,
+      "netflix": true,
+      "youtube": true,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "Printer",
+      "device_category": "Printer",
+      "confidence": 0.88,
+      "reasoning": "JetDirect UA; print services",
+      "indicators": [
+        "JetDirect"
+      ],
+      "last_classified": "2025-08-28T18:02:19.673657"
+    }
+  },
+  {
+    "id": 10,
+    "mac": "BE:53:4A:F8:B5:12",
+    "hostname": "filesrv",
+    "vendor": "Dell",
+    "given_name": "File Server",
+    "ip": "192.168.69.30",
+    "user_agent": [
+      "Mozilla/5.0 (X11; Ubuntu 22.04)"
+    ],
+    "is_active": true,
+    "has_custom_blocklist": false,
+    "group": {
+      "id": 2,
+      "name": "Staff",
+      "is_default": false
+    },
+    "first_seen": "2025-08-13T09:00:08.235974",
+    "last_seen": "2025-08-30T01:11:08.235547",
+    "is_mac_universal": false,
+    "os_name": "Linux 5.15 (Ubuntu 22.04)",
+    "os_accuracy": 95,
+    "os_type": "general purpose",
+    "os_vendor": "Linux",
+    "os_family": "Linux",
+    "os_gen": "5.X",
+    "os_cpe": [
+      "cpe:/o:canonical:ubuntu_linux:22.04"
+    ],
+    "os_last_updated": "2025-08-29T06:03:09.674192",
+    "blocklist": {
+      "ads_trackers": false,
+      "gambling": false,
+      "social_media": true,
+      "porn": true,
+      "gaming": true,
+      "streaming": true,
+      "facebook": true,
+      "instagram": true,
+      "tiktok": true,
+      "netflix": true,
+      "youtube": true,
+      "ai": false,
+      "safesearch": true
+    },
+    "ai_classification": {
+      "device_type": "Server",
+      "device_category": "Network Infrastructure",
+      "confidence": 0.9,
+      "reasoning": "Ubuntu server UA; static IP",
+      "indicators": [
+        "Ubuntu UA",
+        "Server role"
+      ],
+      "last_classified": "2025-08-29T06:04:54.234139"
+    }
+  }
+]

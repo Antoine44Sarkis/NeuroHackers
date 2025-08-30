@@ -3,6 +3,7 @@ import { COLORS } from '../constants/Colors';
 
 export const getDeviceIcon = (category?: string): string => {
   const categoryIcons: Record<string, string> = {
+    // Original categories
     smartphone: 'phone-portrait',
     laptop: 'laptop',
     desktop: 'desktop',
@@ -19,9 +20,19 @@ export const getDeviceIcon = (category?: string): string => {
     network: 'hardware-chip',
     peripheral: 'keyboard',
     unknown: 'help-circle',
+    workstation: 'laptop',
+    mobile: 'phone-portrait',
+    gateway: 'hardware-chip',
+    'network infrastructure': 'hardware-chip',
+    'access point': 'wifi',
+    iot: 'cube',
+    'ip camera': 'camera',
+    'smart tv': 'tv',
+    'nas': 'server',
   };
 
-  return category ? categoryIcons[category.toLowerCase()] || 'device-desktop' : 'device-desktop';
+  const normalizedCategory = category?.toLowerCase().replace(' ', '_') || 'unknown';
+  return categoryIcons[normalizedCategory] || 'device-desktop';
 };
 
 export const getStatusColor = (device: Device): string => {

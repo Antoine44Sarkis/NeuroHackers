@@ -1,154 +1,1130 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StatusBar, RefreshControl, StyleSheet, Dimensions } from 'react-native';
-import { useDevices } from '../hooks/useDevices';
-import { useDeviceActions } from '../hooks/useDeviceActions';
-import { filterDevices } from '../utils/deviceUtils';
-import { ViewMode } from '../constants/Types';
-import { COLORS } from '../constants/Colors';
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+  Dimensions,
+  StatusBar,
+  SafeAreaView,
+  Alert,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { getGroupColor } from "@/utils/deviceUtils";
+import { Ionicons } from "@expo/vector-icons";
 
-import SearchBar from '../components/SearchBar';
-import FilterBar from '../components/FilterBar';
-import ViewToggle from '../components/ViewToggle';
-import DeviceGridItem from '../components/DeviceGridItem';
-import DeviceListView from '../components/DeviceListView';
-import DeviceRadialView from '../components/DeviceRadialView';
-import DeviceModal from '../components/DeviceModal';
+const API_BASE = "http://192.168.0.103:8000";
 
-const { width } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-export default function App() {
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedFilter, setSelectedFilter] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [selectedDevice, setSelectedDevice] = useState<any>(null);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
+type Device = {
+  id: number;
+  given_name: string;
+  hostname: string;
+  vendor: string;
+  ip: string;
+  is_active: boolean;
+  os_name: string;
+  group: { name: string };
+  ai_classification: {
+    device_category: string;
+    device_type: string;
+    confidence: number;
+  };
+  blocklist: { [key: string]: boolean };
+  [key: string]: any;
+};
 
-  const { devices, summary, loading, refresh, updateDevice } = useDevices();
-  const { performAction } = useDeviceActions(updateDevice);
-
-  const filteredDevices = filterDevices(devices, searchQuery, selectedFilter);
-
-  const handleDevicePress = (device: any) => {
-    setSelectedDevice(device);
-    setModalVisible(true);
+const DeviceVizMobile = () => {
+  const [devices, setDevices] = useState<Device[]>([]);
+  type Summary = {
+    active?: number;
+    total?: number;
+    by_risk?: { high?: number; medium?: number; low?: number };
+    by_group?: { [group: string]: number };
   };
 
-  const handleAction = async (deviceId: number, action: string, category?: string) => {
-    // Call performAction and get the updated device directly
-    const updatedDevice = await performAction(deviceId, action, category);
-    // If the modal is open and the selected device is the one being updated, update its state immediately
-    if (selectedDevice && selectedDevice.id === deviceId && updatedDevice) {
-      setSelectedDevice(updatedDevice);
+  const [summary, setSummary] = useState<Summary>({});
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterGroup, setFilterGroup] = useState("all");
+  const [viewMode, setViewMode] = useState("constellation");
+  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchData().then(() => setRefreshing(false));
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [devicesRes, summaryRes] = await Promise.all([
+        fetch(`${API_BASE}/api/devices`),
+        fetch(`${API_BASE}/api/summary`),
+      ]);
+
+      if (!devicesRes.ok || !summaryRes.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const devicesData = await devicesRes.json();
+      const summaryData = await summaryRes.json();
+
+      setDevices(devicesData);
+      setSummary(summaryData);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+      Alert.alert(
+        "Error",
+        "Failed to connect to API. Make sure your API is running and check the API_BASE URL."
+      );
+      setLoading(false);
     }
   };
 
-  const renderDevices = () => {
-    if (viewMode === 'radial') {
-      return <DeviceRadialView devices={filteredDevices} onDevicePress={handleDevicePress} />;
+  const performAction = async (
+    deviceId: any,
+    action: string,
+    category: string | null = null
+  ) => {
+    try {
+      const body: { action: string; category?: string | null } = { action };
+      if (category) body.category = category;
+
+      const response = await fetch(
+        `${API_BASE}/api/devices/${deviceId}/actions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (response.ok) {
+        await fetchData();
+        setModalVisible(false);
+        Alert.alert("Success", `Action "${action}" completed successfully.`);
+      } else {
+        throw new Error("Action failed");
+      }
+    } catch (error) {
+      console.error("Action failed:", error);
+      Alert.alert("Error", "Failed to perform action. Please try again.");
     }
-    
-    return filteredDevices.map((device) => (
-      viewMode === 'grid' 
-        ? <DeviceGridItem key={device.id} device={device} onPress={handleDevicePress} />
-        : <DeviceListView key={device.id} device={device} onPress={handleDevicePress} />
-    ));
   };
+
+  const getDeviceIcon = (category: string | number) => {
+    const icons = {
+      Mobile: "📱",
+      "Network Infrastructure": "🌐",
+      IoT: "📹",
+      Printer: "🖨️",
+      Workstation: "💻",
+    };
+    return icons[String(category) as keyof typeof icons] || "💻";
+  };
+
+  type Device = {
+    blocklist: { [key: string]: boolean };
+    [key: string]: any;
+  };
+
+  const getRiskLevel = (device: Device) => {
+    const blockedCount = Object.entries(device.blocklist).filter(
+      ([key, value]) => value && key !== "safesearch"
+    ).length;
+
+    if (blockedCount > 8) return "high";
+    if (blockedCount > 4) return "medium";
+    return "low";
+  };
+
+  const getRiskColor = (risk: string) => {
+    const colors = {
+      high: "#EF4444",
+      medium: "#F59E0B",
+      low: "#22C55E",
+    };
+    return colors[risk as keyof typeof colors] || "#6B7280";
+  };
+
+  const filteredDevices = useMemo(() => {
+    return devices.filter((device) => {
+      const matchesSearch =
+        device.given_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        device.hostname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        device.vendor.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesGroup =
+        filterGroup === "all" || device.group.name === filterGroup;
+      return matchesSearch && matchesGroup;
+    });
+  }, [devices, searchTerm, filterGroup]);
+
+  const ConstellationView = () => {
+    const centerX = screenWidth * 0.5;
+    const centerY = 200;
+    const baseRadius = 80;
+
+    return (
+      <View style={styles.constellationContainer}>
+        <View style={styles.constellationCenter}>
+          <Text style={styles.centerText}>🌐</Text>
+          <Text style={styles.centerLabel}>Network</Text>
+        </View>
+
+        {filteredDevices.map((device, index) => {
+          const angle = (index / filteredDevices.length) * 2 * Math.PI;
+          const riskMultiplier = getRiskLevel(device) === "high" ? 1.4 : 1;
+          const radius = baseRadius * riskMultiplier;
+          const x = centerX + radius * Math.cos(angle) - 25;
+          const y = centerY + radius * Math.sin(angle) - 25;
+
+          const riskColor = getRiskColor(getRiskLevel(device));
+          const groupColor = getGroupColor(device.group.name);
+
+          return (
+            <TouchableOpacity
+              key={device.id}
+              style={[
+                styles.deviceNode,
+                {
+                  left: x,
+                  top: y,
+                  backgroundColor: groupColor,
+                  borderColor: riskColor,
+                  borderWidth: 3,
+                  opacity: device.is_active ? 1 : 0.6,
+                },
+              ]}
+              onPress={() => {
+                setSelectedDevice(device);
+                setModalVisible(true);
+              }}
+            >
+              <Text style={styles.deviceIcon}>
+                {getDeviceIcon(device.ai_classification.device_category)}
+              </Text>
+
+              {/* Activity indicator */}
+              <View
+                style={[
+                  styles.activityIndicator,
+                  { backgroundColor: device.is_active ? "#22C55E" : "#6B7280" },
+                ]}
+              />
+
+              {/* Risk pulse ring */}
+              {getRiskLevel(device) === "high" && (
+                <View style={[styles.riskPulse, { borderColor: riskColor }]} />
+              )}
+            </TouchableOpacity>
+          );
+        })}
+
+        {/* Device labels */}
+        {filteredDevices.map((device, index) => {
+          const angle = (index / filteredDevices.length) * 2 * Math.PI;
+          const radius = baseRadius * 1.6;
+          const x = centerX + radius * Math.cos(angle);
+          const y = centerY + radius * Math.sin(angle);
+
+          return (
+            <View
+              key={`label-${device.id}`}
+              style={[styles.deviceLabel, { left: x - 40, top: y - 10 }]}
+            >
+              <Text style={styles.labelText} numberOfLines={1}>
+                {device.given_name}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
+  const HeatmapView = () => {
+    const itemsPerRow = 3;
+    const itemSize = (screenWidth - 60) / itemsPerRow - 10;
+
+    return (
+      <View style={styles.heatmapContainer}>
+        {filteredDevices.map((device, index) => {
+          const risk = getRiskLevel(device);
+          const intensity = risk === "high" ? 1 : risk === "medium" ? 0.6 : 0.2;
+          const riskColor = getRiskColor(risk);
+
+          return (
+            <TouchableOpacity
+              key={device.id}
+              style={[
+                styles.heatmapItem,
+                {
+                  width: itemSize,
+                  height: itemSize,
+                  backgroundColor: `rgba(239, 68, 68, ${intensity})`,
+                  borderColor: device.is_active ? "#22C55E" : "#6B7280",
+                  borderWidth: 2,
+                },
+              ]}
+              onPress={() => {
+                setSelectedDevice(device);
+                setModalVisible(true);
+              }}
+            >
+              <Text style={styles.heatmapIcon}>
+                {getDeviceIcon(device.ai_classification.device_category)}
+              </Text>
+
+              <Text style={styles.heatmapLabel} numberOfLines={1}>
+                {device.given_name}
+              </Text>
+
+              {/* Confidence bar */}
+              <View style={styles.confidenceBar}>
+                <View
+                  style={[
+                    styles.confidenceFill,
+                    { width: `${device.ai_classification.confidence * 100}%` },
+                  ]}
+                />
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    );
+  };
+
+  const NetworkView = () => {
+    const groups = Object.keys(summary.by_group || {});
+
+    return (
+      <View style={styles.networkContainer}>
+        {groups.map((groupName, groupIndex) => {
+          const groupDevices = filteredDevices.filter(
+            (d) => d.group.name === groupName
+          );
+          const centerX = 80 + (groupIndex % 2) * (screenWidth - 160);
+          const centerY = 120 + Math.floor(groupIndex / 2) * 180;
+
+          return (
+            <View key={groupName}>
+              {/* Group center */}
+              <View
+                style={[
+                  styles.groupCenter,
+                  {
+                    left: centerX - 30,
+                    top: centerY - 30,
+                    backgroundColor: getGroupColor(groupName),
+                  },
+                ]}
+              >
+                <Text style={styles.groupCount}>{groupDevices.length}</Text>
+                <Text style={styles.groupName} numberOfLines={1}>
+                  {groupName}
+                </Text>
+              </View>
+
+              {/* Orbiting devices */}
+              {groupDevices.map((device, deviceIndex) => {
+                const angle = (deviceIndex / groupDevices.length) * 2 * Math.PI;
+                const orbitRadius = 50;
+                const x = centerX + orbitRadius * Math.cos(angle) - 15;
+                const y = centerY + orbitRadius * Math.sin(angle) - 15;
+
+                return (
+                  <TouchableOpacity
+                    key={device.id}
+                    style={[
+                      styles.orbitDevice,
+                      {
+                        left: x,
+                        top: y,
+                        backgroundColor: getRiskColor(getRiskLevel(device)),
+                        opacity: device.is_active ? 1 : 0.5,
+                      },
+                    ]}
+                    onPress={() => {
+                      setSelectedDevice(device);
+                      setModalVisible(true);
+                    }}
+                  >
+                    <Text style={styles.orbitIcon}>
+                      {getDeviceIcon(device.ai_classification.device_category)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
+  const DeviceDetailModal = () => {
+    if (!selectedDevice) return null;
+
+    const blocklistCategories = Object.entries(selectedDevice.blocklist);
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <ScrollView style={styles.modalScroll}>
+              {/* Header */}
+              <View style={styles.modalHeader}>
+                <View style={styles.modalHeaderContent}>
+                  <Text style={styles.modalTitle}>
+                    {selectedDevice.given_name}
+                  </Text>
+                  <Text style={styles.modalSubtitle}>
+                    {selectedDevice.hostname} • {selectedDevice.vendor}
+                  </Text>
+                  <Text style={styles.modalIP}>{selectedDevice.ip}</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Ionicons name="close" size={24} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Status */}
+              <View style={styles.statusContainer}>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    {
+                      backgroundColor: selectedDevice.is_active
+                        ? "#22C55E"
+                        : "#6B7280",
+                    },
+                  ]}
+                >
+                  <Text style={styles.statusText}>
+                    {selectedDevice.is_active ? "🟢 Online" : "🔴 Offline"}
+                  </Text>
+                </View>
+
+                <View
+                  style={[
+                    styles.riskBadge,
+                    {
+                      backgroundColor: getRiskColor(
+                        getRiskLevel(selectedDevice)
+                      ),
+                    },
+                  ]}
+                >
+                  <Text style={styles.riskText}>
+                    {getRiskLevel(selectedDevice).toUpperCase()} RISK
+                  </Text>
+                </View>
+              </View>
+
+              {/* Device Info */}
+              <View style={styles.infoSection}>
+                <Text style={styles.sectionTitle}>Device Information</Text>
+                <View style={styles.infoGrid}>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="hardware-chip" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                      {selectedDevice.ai_classification.device_type}
+                    </Text>
+                  </View>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="laptop" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                      {selectedDevice.os_name}
+                    </Text>
+                  </View>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="people" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                      {selectedDevice.group.name}
+                    </Text>
+                  </View>
+                  <View style={styles.infoItem}>
+                    <Ionicons name="stats-chart" size={16} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                      {Math.round(
+                        selectedDevice.ai_classification.confidence * 100
+                      )}
+                      % Confidence
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Quick Actions */}
+              <View style={styles.actionSection}>
+                <Text style={styles.sectionTitle}>Quick Actions</Text>
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.isolateButton]}
+                    onPress={() => performAction(selectedDevice.id, "isolate")}
+                  >
+                    <Ionicons name="lock-closed" size={20} color="#FFFFFF" />
+                    <Text style={styles.actionButtonText}>Isolate</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.releaseButton]}
+                    onPress={() => performAction(selectedDevice.id, "release")}
+                  >
+                    <Ionicons name="lock-open" size={20} color="#FFFFFF" />
+                    <Text style={styles.actionButtonText}>Release</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Content Filtering */}
+              <View style={styles.blocklistSection}>
+                <Text style={styles.sectionTitle}>Content Filtering</Text>
+                <View style={styles.blocklistGrid}>
+                  {blocklistCategories.map(([category, blocked]) => (
+                    <TouchableOpacity
+                      key={category}
+                      style={[
+                        styles.blocklistItem,
+                        { backgroundColor: blocked ? "#FEE2E2" : "#F3F4F6" },
+                      ]}
+                      onPress={() =>
+                        performAction(
+                          selectedDevice.id,
+                          "toggle_block",
+                          category
+                        )
+                      }
+                    >
+                      <Text
+                        style={[
+                          styles.blocklistText,
+                          { color: blocked ? "#DC2626" : "#6B7280" },
+                        ]}
+                      >
+                        {blocked ? "👁️" : "🚫"} {category.replace("_", " ")}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6366F1" />
+        <Text style={styles.loadingText}>Loading device network...</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
 
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Chimera Devices</Text>
-          <Text style={styles.headerSubtitle}>
-            {summary.active || 0}/{summary.total || 0} Active
-          </Text>
+          <Text style={styles.title}>Chimera Network</Text>
+          <TouchableOpacity onPress={fetchData} style={styles.refreshButton}>
+            <Ionicons name="refresh" size={20} color="#6366F1" />
+          </TouchableOpacity>
         </View>
-        <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+        <View style={styles.statsContainer}>
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>{summary.active}</Text>
+            <Text style={styles.statLabel}>Active</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>{summary.total}</Text>
+            <Text style={styles.statLabel}>Total</Text>
+          </View>
+          {summary.by_risk && (
+            <View style={styles.stat}>
+              <Text style={[styles.statValue, { color: "#EF4444" }]}>
+                {summary.by_risk.high}
+              </Text>
+              <Text style={styles.statLabel}>High Risk</Text>
+            </View>
+          )}
+        </View>
       </View>
 
+      {/* Controls */}
       <View style={styles.controls}>
-        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        <FilterBar selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#9CA3AF" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search devices..."
+            placeholderTextColor="#9CA3AF"
+            value={searchTerm}
+            onChangeText={setSearchTerm}
+          />
+          {searchTerm.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchTerm("")}>
+              <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.filterRow}>
+          <View style={styles.pickerContainer}>
+            <Ionicons name="filter" size={16} color="#6B7280" style={styles.filterIcon} />
+            <Picker
+              selectedValue={filterGroup}
+              onValueChange={setFilterGroup}
+              style={styles.picker}
+            >
+              <Picker.Item label="All Groups" value="all" />
+              {Object.keys(summary.by_group || {}).map((group) => (
+                <Picker.Item key={group} label={group} value={group} />
+              ))}
+            </Picker>
+          </View>
+        </View>
+
+        <View style={styles.viewToggle}>
+          {[
+            { key: "constellation", icon: "planet" },
+            { key: "heatmap", icon: "grid" },
+            { key: "network", icon: "git-network" }
+          ].map((mode) => (
+            <TouchableOpacity
+              key={mode.key}
+              style={[
+                styles.toggleButton,
+                viewMode === mode.key && styles.activeToggle,
+              ]}
+              onPress={() => setViewMode(mode.key)}
+            >
+              <Ionicons 
+                name={mode.icon as any} 
+                size={20} 
+                color={viewMode === mode.key ? "#FFFFFF" : "#6B7280"} 
+              />
+              <Text
+                style={[
+                  styles.toggleText,
+                  viewMode === mode.key && styles.activeToggleText,
+                ]}
+              >
+                {mode.key.charAt(0).toUpperCase() + mode.key.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
-      <ScrollView
-        style={styles.deviceList}
-        contentContainerStyle={viewMode === 'grid' ? styles.gridContainer : {}}
+      {/* Main Visualization */}
+      <ScrollView 
+        style={styles.visualizationContainer}
         refreshControl={
-          <RefreshControl 
-            refreshing={loading} 
-            onRefresh={refresh} 
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {renderDevices()}
-
-        {filteredDevices.length === 0 && !loading && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No devices found</Text>
-          </View>
-        )}
+        <View style={styles.visualization}>
+          {viewMode === "constellation" && <ConstellationView />}
+          {viewMode === "heatmap" && <HeatmapView />}
+          {viewMode === "network" && <NetworkView />}
+        </View>
       </ScrollView>
 
-      <DeviceModal
-        visible={modalVisible}
-        device={selectedDevice}
-        onClose={() => setModalVisible(false)}
-        onAction={handleAction}
-      />
-    </View>
+      <DeviceDetailModal />
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: { 
-    backgroundColor: COLORS.primary, 
-    paddingTop: 50, 
-    paddingBottom: 15, 
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  container: {
+    flex: 1,
+    backgroundColor: "#F3F4F6",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F3F4F6",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#6B7280",
+  },
+  header: {
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   headerTitleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#111827",
+  },
+  refreshButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+  },
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  stat: {
+    alignItems: "center",
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#6366F1",
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 4,
+  },
+  controls: {
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 12,
+    backgroundColor: "#FFFFFF",
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#111827",
+  },
+  filterRow: {
+    marginBottom: 12,
+  },
+  pickerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    backgroundColor: "#FFFFFF",
+  },
+  filterIcon: {
+    marginRight: 8,
+  },
+  picker: {
+    flex: 1,
+    height: 50,
+  },
+  viewToggle: {
+    flexDirection: "row",
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    padding: 4,
+  },
+  toggleButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 6,
+  },
+  activeToggle: {
+    backgroundColor: "#6366F1",
+  },
+  toggleText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  activeToggleText: {
+    color: "#FFFFFF",
+  },
+  visualizationContainer: {
     flex: 1,
   },
-  headerTitle: { 
-    fontSize: 24, 
-    fontWeight: 'bold', 
-    color: 'white', 
+  visualization: {
+    padding: 20,
+    minHeight: 400,
+  },
+
+  // Constellation View Styles
+  constellationContainer: {
+    height: 400,
+    position: "relative",
+  },
+  constellationCenter: {
+    position: "absolute",
+    left: screenWidth * 0.5 - 30,
+    top: 170,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#6366F1",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  centerText: {
+    fontSize: 24,
+  },
+  centerLabel: {
+    position: "absolute",
+    top: 65,
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "bold",
+  },
+  deviceNode: {
+    position: "absolute",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  deviceIcon: {
+    fontSize: 20,
+  },
+  activityIndicator: {
+    position: "absolute",
+    top: -3,
+    right: -3,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
+  riskPulse: {
+    position: "absolute",
+    top: -5,
+    left: -5,
+    right: -5,
+    bottom: -5,
+    borderRadius: 30,
+    borderWidth: 2,
+    opacity: 0.6,
+  },
+  deviceLabel: {
+    position: "absolute",
+    backgroundColor: "rgba(0,0,0,0.7)",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    width: 80,
+  },
+  labelText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    textAlign: "center",
+  },
+
+  // Heatmap View Styles
+  heatmapContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  heatmapItem: {
+    marginBottom: 10,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 3,
+  },
+  heatmapIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  heatmapLabel: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  confidenceBar: {
+    width: "80%",
+    height: 4,
+    backgroundColor: "rgba(255,255,255,0.3)",
+    borderRadius: 2,
+  },
+  confidenceFill: {
+    height: "100%",
+    backgroundColor: "#22C55E",
+    borderRadius: 2,
+  },
+
+  // Network View Styles
+  networkContainer: {
+    height: 400,
+    position: "relative",
+  },
+  groupCenter: {
+    position: "absolute",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  groupCount: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  groupName: {
+    position: "absolute",
+    top: 65,
+    fontSize: 10,
+    color: "#6B7280",
+    fontWeight: "bold",
+    width: 80,
+    textAlign: "center",
+  },
+  orbitDevice: {
+    position: "absolute",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
+  },
+  orbitIcon: {
+    fontSize: 12,
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "85%",
+  },
+  modalScroll: {
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 20,
+  },
+  modalHeaderContent: {
+    flex: 1,
+    marginRight: 16,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#111827",
     marginBottom: 4,
   },
-  headerSubtitle: {
-    color: COLORS.success, 
-    fontSize: 16, 
-    fontWeight: '600' 
-  },
-  controls: { 
-    backgroundColor: 'white', 
-    padding: 15, 
-    borderBottomWidth: 1, 
-    borderBottomColor: '#eee' 
-  },
-  deviceList: { 
-    flex: 1, 
-    padding: 15 
-  },
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingTop: 50,
-  },
-  emptyText: {
+  modalSubtitle: {
     fontSize: 16,
-    color: '#999',
-    marginTop: 10,
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  modalIP: {
+    fontSize: 14,
+    color: "#9CA3AF",
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statusContainer: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 24,
+  },
+  statusBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  statusText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  riskBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  riskText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  infoSection: {
+    backgroundColor: "#F9FAFB",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 16,
+  },
+  infoGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 8,
+    minWidth: "45%",
+  },
+  infoText: {
+    fontSize: 14,
+    color: "#4B5563",
+    fontWeight: "500",
+  },
+  actionSection: {
+    marginBottom: 24,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  isolateButton: {
+    backgroundColor: "#EF4444",
+  },
+  releaseButton: {
+    backgroundColor: "#22C55E",
+  },
+  actionButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  blocklistSection: {
+    marginBottom: 20,
+  },
+  blocklistGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  blocklistItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginBottom: 8,
+    minWidth: "45%",
+  },
+  blocklistText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
+
+export default DeviceVizMobile;

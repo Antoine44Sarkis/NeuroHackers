@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 import json
 import os
 from datetime import datetime
@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DEVICES_FILE = "devices.sample.json"
+DEVICES_FILE = "devices.sample_1.json"
 devices_data = []
 
 def load_devices():
@@ -78,11 +78,11 @@ class AIClassification(BaseModel):
 
 class Device(BaseModel):
     id: int
-    mac: Optional[str] = None
-    hostname: Optional[str] = None
-    vendor: Optional[str] = None
-    given_name: Optional[str] = None
-    ip: Optional[str] = None
+    mac: str
+    hostname: str
+    vendor: str
+    given_name: str
+    ip: str
     user_agent: List[str] = []
     group: Group
     is_active: bool
@@ -92,10 +92,10 @@ class Device(BaseModel):
     is_mac_universal: bool
     os_name: str
     os_accuracy: int = Field(..., ge=0, le=100)
-    os_type: Optional[str] = None
-    os_vendor: Optional[str] = None
-    os_family: Optional[str] = None
-    os_gen: Optional[str] = None
+    os_type: str
+    os_vendor: str
+    os_family: str
+    os_gen: str
     os_cpe: List[str] = []
     os_last_updated: str
     blocklist: Blocklist
@@ -104,16 +104,20 @@ class Device(BaseModel):
 class DeviceUpdate(BaseModel):
     given_name: Optional[str] = None
     group: Optional[Dict[str, Any]] = None
-    blocklist: Optional[Dict[str, bool]] = None
-
-    @validator('blocklist')
-    def validate_blocklist(cls, v):
-        if v:
-            valid_keys = Blocklist.schema()['properties'].keys()
-            for key in v.keys():
-                if key not in valid_keys:
-                    raise ValueError(f"Invalid blocklist category: {key}")
-        return v
+    # Allow individual blocklist fields to be updated
+    ads_trackers: Optional[bool] = None
+    gambling: Optional[bool] = None
+    social_media: Optional[bool] = None
+    porn: Optional[bool] = None
+    gaming: Optional[bool] = None
+    streaming: Optional[bool] = None
+    facebook: Optional[bool] = None
+    instagram: Optional[bool] = None
+    tiktok: Optional[bool] = None
+    netflix: Optional[bool] = None
+    youtube: Optional[bool] = None
+    ai: Optional[bool] = None
+    safesearch: Optional[bool] = None
 
 class DeviceAction(BaseModel):
     action: ActionType
@@ -124,8 +128,14 @@ class DeviceAction(BaseModel):
         if values.get('action') == ActionType.TOGGLE_BLOCK and not v:
             raise ValueError('Category is required for toggle_block action')
         
-        if v and v not in Blocklist.schema()['properties'].keys():
-            raise ValueError(f"Invalid category: {v}")
+        valid_categories = [
+            'ads_trackers', 'gambling', 'social_media', 'porn', 'gaming',
+            'streaming', 'facebook', 'instagram', 'tiktok', 'netflix',
+            'youtube', 'ai', 'safesearch'
+        ]
+        
+        if v and v not in valid_categories:
+            raise ValueError(f"Invalid category: {v}. Valid categories: {valid_categories}")
         return v
 
 def find_device_by_id(device_id: int):
@@ -171,9 +181,10 @@ async def get_summary():
         category = device["ai_classification"]["device_category"]
         by_category[category] = by_category.get(category, 0) + 1
     
+    # Calculate risk levels based on blocklist restrictions
     risk_levels = {"high": 0, "medium": 0, "low": 0}
     for device in devices_data:
-        blocked_count = sum(1 for v in device["blocklist"].values() if v)
+        blocked_count = sum(1 for k, v in device["blocklist"].items() if v and k != "safesearch")
         if blocked_count > 8:
             risk_levels["high"] += 1
         elif blocked_count > 4:
@@ -196,15 +207,29 @@ async def update_device(device_id: int, update_data: DeviceUpdate):
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
     
+    # Update given_name
     if update_data.given_name is not None:
         device["given_name"] = update_data.given_name
     
+    # Update group
     if update_data.group is not None and "id" in update_data.group:
         update_group_info(device, update_data.group["id"])
     
-    if update_data.blocklist is not None:
-        for key, value in update_data.blocklist.items():
-            device["blocklist"][key] = value
+    # Update individual blocklist fields
+    blocklist_fields = [
+        'ads_trackers', 'gambling', 'social_media', 'porn', 'gaming',
+        'streaming', 'facebook', 'instagram', 'tiktok', 'netflix',
+        'youtube', 'ai', 'safesearch'
+    ]
+    
+    blocklist_updated = False
+    for field in blocklist_fields:
+        value = getattr(update_data, field)
+        if value is not None:
+            device["blocklist"][field] = value
+            blocklist_updated = True
+    
+    if blocklist_updated:
         device["has_custom_blocklist"] = True
     
     save_devices()
@@ -220,11 +245,13 @@ async def device_action(device_id: int, action_data: DeviceAction):
     action = action_data.action
     
     if action == ActionType.ISOLATE:
+        # Set all blocklist items to True
         for key in device["blocklist"]:
             device["blocklist"][key] = True
         device["has_custom_blocklist"] = True
         
     elif action == ActionType.RELEASE:
+        # Set all blocklist items to False except safesearch
         for key in device["blocklist"]:
             if key == "safesearch":
                 device["blocklist"][key] = True
@@ -234,15 +261,31 @@ async def device_action(device_id: int, action_data: DeviceAction):
         
     elif action == ActionType.TOGGLE_BLOCK:
         category = action_data.category
+        if category not in device["blocklist"]:
+            raise HTTPException(status_code=400, detail=f"Invalid blocklist category: {category}")
         device["blocklist"][category] = not device["blocklist"][category]
         device["has_custom_blocklist"] = True
     
     save_devices()
     return device
 
+# Add health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "devices_loaded": len(devices_data)}
+
 @app.get("/")
 async def root():
-    return {"message": "Chimera Device API", "version": "1.0.0"}
+    return {
+        "message": "Chimera Device API", 
+        "version": "1.0.0",
+        "endpoints": {
+            "devices": "/api/devices",
+            "summary": "/api/summary",
+            "update_device": "/api/devices/{id}",
+            "device_actions": "/api/devices/{id}/actions"
+        }
+    }
 
 if __name__ == "__main__":
     import uvicorn
