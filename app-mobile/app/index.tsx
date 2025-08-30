@@ -17,7 +17,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { getGroupColor } from "@/utils/deviceUtils";
 import { Ionicons } from "@expo/vector-icons";
-
+import { performDeviceAction } from "@/services/api";
 // @ts-ignore
 import { API_BASE } from "@env";
 
@@ -187,7 +187,7 @@ const DeviceVizMobile = () => {
     const containerHeight = 400;
     const centerX = screenWidth * 0.5 - 20;
     const centerY = containerHeight * 0.5;
-    const circleRadius = 140; // increased radius for more spacing
+    const circleRadius = 140;
 
     return (
       <View
@@ -343,7 +343,6 @@ const DeviceVizMobile = () => {
           const groupDevices = filteredDevices.filter(
             (d) => d.group.name === groupName
           );
-          // Place two groups per row, closer together
           const centerX = 100 + (groupIndex % 2) * (screenWidth / 2 - 40);
           const centerY = 120 + Math.floor(groupIndex / 2) * 180;
 
@@ -413,7 +412,6 @@ const DeviceVizMobile = () => {
 
     const blocklistCategories = Object.entries(optimisticDevice.blocklist);
 
-    // Optimistic toggle handler for blocklist
     const handleBlocklistToggle = async (category: string) => {
       const newBlocklist = {
         ...optimisticDevice.blocklist,
@@ -466,6 +464,8 @@ const DeviceVizMobile = () => {
     const handleQuickAction = async (action: "isolate" | "release") => {
       // Optimistically update is_active (assume isolate = false, release = true)
       const newIsActive = action === "release";
+
+      // Update all states optimistically
       setOptimisticDevice({ ...optimisticDevice, is_active: newIsActive });
       setSelectedDevice((prev) =>
         prev ? { ...prev, is_active: newIsActive } : prev
@@ -475,32 +475,48 @@ const DeviceVizMobile = () => {
           d.id === optimisticDevice.id ? { ...d, is_active: newIsActive } : d
         )
       );
+
       try {
-        const body = { action };
+        // Make the API call directly without the category parameter
         const response = await fetch(
           `${API_BASE}/api/devices/${optimisticDevice.id}/actions`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            body: JSON.stringify({ action }),
           }
         );
+
         if (!response.ok) throw new Error("Action failed");
-        Alert.alert("Success", `Action \"${action}\" completed successfully.`);
+
+        const updatedDevice = await response.json();
+
+        // Update with the actual response from server
+        setOptimisticDevice(updatedDevice);
+        setSelectedDevice(updatedDevice);
+        setDevices((prev) =>
+          prev.map((d) => (d.id === updatedDevice.id ? updatedDevice : d))
+        );
+
+        Alert.alert("Success", `Action "${action}" completed successfully.`);
       } catch (error) {
         // Revert optimistic update on error
-        setOptimisticDevice({ ...optimisticDevice, is_active: !newIsActive });
+        const revertIsActive = !newIsActive;
+        setOptimisticDevice({ ...optimisticDevice, is_active: revertIsActive });
         setSelectedDevice((prev) =>
-          prev ? { ...prev, is_active: !newIsActive } : prev
+          prev ? { ...prev, is_active: revertIsActive } : prev
         );
         setDevices((prev) =>
           prev.map((d) =>
-            d.id === optimisticDevice.id ? { ...d, is_active: !newIsActive } : d
+            d.id === optimisticDevice.id
+              ? { ...d, is_active: revertIsActive }
+              : d
           )
         );
+
         Alert.alert(
           "Error",
-          `Failed to perform action \"${action}\". Please try again.`
+          `Failed to perform action "${action}". Please try again.`
         );
       }
     };
