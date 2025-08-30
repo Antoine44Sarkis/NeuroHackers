@@ -318,7 +318,8 @@ const DeviceVizMobile = () => {
           const groupDevices = filteredDevices.filter(
             (d) => d.group.name === groupName
           );
-          const centerX = 80 + (groupIndex % 2) * (screenWidth - 160);
+          // Place two groups per row, closer together
+          const centerX = 100 + (groupIndex % 2) * (screenWidth / 2 - 40);
           const centerY = 120 + Math.floor(groupIndex / 2) * 180;
 
           return (
