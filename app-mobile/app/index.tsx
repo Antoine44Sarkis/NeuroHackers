@@ -237,7 +237,7 @@ const DeviceVizMobile = () => {
                     backgroundColor: groupColor,
                     borderColor: riskColor,
                     borderWidth: 3,
-                    opacity: device.is_active ? 1 : 0.6,
+                    // opacity removed
                   },
                 ]}
                 onPress={() => {
@@ -257,12 +257,6 @@ const DeviceVizMobile = () => {
                     },
                   ]}
                 />
-                {/* Risk pulse ring */}
-                {getRiskLevel(device) === "high" && (
-                  <View
-                    style={[styles.riskPulse, { borderColor: riskColor }]}
-                  />
-                )}
               </TouchableOpacity>
               <View
                 style={[
@@ -381,7 +375,7 @@ const DeviceVizMobile = () => {
                         left: x,
                         top: y,
                         backgroundColor: getRiskColor(getRiskLevel(device)),
-                        opacity: device.is_active ? 1 : 0.5,
+                        // opacity removed
                       },
                     ]}
                     onPress={() => {
@@ -1011,7 +1005,7 @@ const styles = StyleSheet.create({
     bottom: -5,
     borderRadius: 30,
     borderWidth: 2,
-    opacity: 0.6,
+    // opacity removed (keep only for shadow)
   },
   deviceLabel: {
     position: "absolute",

@@ -3,7 +3,6 @@ import { COLORS } from '../constants/Colors';
 
 export const getDeviceIcon = (category?: string): string => {
   const categoryIcons: Record<string, string> = {
-    // Original categories
     smartphone: 'phone-portrait',
     laptop: 'laptop',
     desktop: 'desktop',
