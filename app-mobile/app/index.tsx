@@ -33,8 +33,13 @@ export default function App() {
     setModalVisible(true);
   };
 
-  const handleAction = (deviceId: number, action: string, category?: string) => {
-    performAction(deviceId, action, category);
+  const handleAction = async (deviceId: number, action: string, category?: string) => {
+    // Call performAction and get the updated device directly
+    const updatedDevice = await performAction(deviceId, action, category);
+    // If the modal is open and the selected device is the one being updated, update its state immediately
+    if (selectedDevice && selectedDevice.id === deviceId && updatedDevice) {
+      setSelectedDevice(updatedDevice);
+    }
   };
 
   const renderDevices = () => {

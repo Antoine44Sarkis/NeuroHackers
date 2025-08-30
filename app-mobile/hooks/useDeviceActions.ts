@@ -10,16 +10,16 @@ export const useDeviceActions = (updateDevice: (device: Device) => void) => {
     deviceId: number,
     action: string,
     category: string | null = null
-  ): Promise<void> => {
+  ): Promise<Device | undefined> => {
     try {
       setActionLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
       const updatedDevice = await performDeviceAction(deviceId, action, category);
       updateDevice(updatedDevice);
-      
+      return updatedDevice;
     } catch (error) {
       console.error('Action failed:', error);
+      return undefined;
     } finally {
       setActionLoading(false);
     }
