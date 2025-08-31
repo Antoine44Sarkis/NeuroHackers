@@ -77,11 +77,12 @@ Before running the app, make sure you have the following installed:
    ```sh
    npx expo start
    ```
-
+   download expo go app on yoour mobile.
 5. **Run on your device or emulator:**
    - Press `w` to open in your browser (web)
    - Press `a` for Android emulator/device
    - Press `i` for iOS simulator/device
+   - scan QR Code into your expo go app mobile
 
 ---
 
