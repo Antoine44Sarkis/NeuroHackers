@@ -17,7 +17,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { getGroupColor } from "@/utils/deviceUtils";
 import { Ionicons } from "@expo/vector-icons";
-import { performDeviceAction } from "@/services/api";
+
 // @ts-ignore
 import { API_BASE } from "@env";
 
