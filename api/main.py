@@ -181,7 +181,6 @@ async def get_summary():
         category = device["ai_classification"]["device_category"]
         by_category[category] = by_category.get(category, 0) + 1
     
-    # Calculate risk levels based on blocklist restrictions
     risk_levels = {"high": 0, "medium": 0, "low": 0}
     for device in devices_data:
         blocked_count = sum(1 for k, v in device["blocklist"].items() if v and k != "safesearch")

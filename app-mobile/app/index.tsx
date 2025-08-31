@@ -115,8 +115,6 @@ const DeviceVizMobile = () => {
 
       if (response.ok) {
         await fetchData();
-        // Do not close modal here; let user close it manually
-        // Optionally show a success message for isolate/release
         if (action !== "toggle_block") {
           Alert.alert(
             "Success",
@@ -237,7 +235,6 @@ const DeviceVizMobile = () => {
                     backgroundColor: groupColor,
                     borderColor: riskColor,
                     borderWidth: 3,
-                    // opacity removed
                   },
                 ]}
                 onPress={() => {
@@ -375,7 +372,6 @@ const DeviceVizMobile = () => {
                         left: x,
                         top: y,
                         backgroundColor: getRiskColor(getRiskLevel(device)),
-                        // opacity removed
                       },
                     ]}
                     onPress={() => {
@@ -454,12 +450,9 @@ const DeviceVizMobile = () => {
       }
     };
 
-    // Optimistic handler for isolate/release
     const handleQuickAction = async (action: "isolate" | "release") => {
-      // Optimistically update is_active (assume isolate = false, release = true)
       const newIsActive = action === "release";
 
-      // Update all states optimistically
       setOptimisticDevice({ ...optimisticDevice, is_active: newIsActive });
       setSelectedDevice((prev) =>
         prev ? { ...prev, is_active: newIsActive } : prev
@@ -471,7 +464,6 @@ const DeviceVizMobile = () => {
       );
 
       try {
-        // Make the API call directly without the category parameter
         const response = await fetch(
           `${API_BASE}/api/devices/${optimisticDevice.id}/actions`,
           {
@@ -485,7 +477,6 @@ const DeviceVizMobile = () => {
 
         const updatedDevice = await response.json();
 
-        // Update with the actual response from server
         setOptimisticDevice(updatedDevice);
         setSelectedDevice(updatedDevice);
         setDevices((prev) =>
@@ -494,7 +485,6 @@ const DeviceVizMobile = () => {
 
         Alert.alert("Success", `Action "${action}" completed successfully.`);
       } catch (error) {
-        // Revert optimistic update on error
         const revertIsActive = !newIsActive;
         setOptimisticDevice({ ...optimisticDevice, is_active: revertIsActive });
         setSelectedDevice((prev) =>
@@ -1117,7 +1107,6 @@ const styles = StyleSheet.create({
     minHeight: 400,
   },
 
-  // Constellation View Styles
   constellationContainer: {
     height: 400,
     position: "relative",
@@ -1184,7 +1173,6 @@ const styles = StyleSheet.create({
     bottom: -5,
     borderRadius: 30,
     borderWidth: 2,
-    // opacity removed (keep only for shadow)
   },
   deviceLabel: {
     position: "absolute",
@@ -1200,7 +1188,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // Heatmap View Styles
   heatmapContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -1242,7 +1229,6 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
 
-  // Network View Styles
   networkContainer: {
     height: 400,
     position: "relative",
@@ -1291,7 +1277,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
